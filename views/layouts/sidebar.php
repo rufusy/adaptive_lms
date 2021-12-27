@@ -61,12 +61,6 @@ use yii\helpers\Url;
                     </ul>
                 </li>
                 <li class="nav-item">
-                    <a href="<?= Url::to(['/courses']);?>" class="nav-link">
-                        <i class="nav-icon fas fa-book-open"></i>
-                        <p>Courses</p>
-                    </a>
-                </li>
-                <li class="nav-item">
                     <a href="<?= Url::to(['/content']);?>" class="nav-link">
                         <i class="nav-icon fas fa-book-open"></i>
                         <p>All content</p>
