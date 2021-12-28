@@ -37,6 +37,7 @@ class ReadingMaterialSearch extends Content
                     'url',
                     'createdBy',
                     'createdAt',
+                    'topic',
                     'course.code',
                     'course.name',
                     'creator.username',
@@ -73,6 +74,7 @@ class ReadingMaterialSearch extends Content
                 'cont.createdBy',
                 'cont.createdAt',
                 'cont.type',
+                'cont.topic'
             ])
             ->joinWith(['course cs' => function(ActiveQuery $q){
                 $q->select(['cs.id', 'cs.code', 'cs.name']);

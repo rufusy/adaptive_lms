@@ -12,6 +12,7 @@ use yii\db\ActiveRecord;
  *
  * @property int $id
  * @property string $name
+ * @property string|null $description
  * @property int|null $pairedWith
  *
  * @property Content[] $contents
@@ -37,6 +38,7 @@ class Characteristic extends ActiveRecord
             [['name'], 'required'],
             [['pairedWith'], 'integer'],
             [['name'], 'string', 'max' => 25],
+            [['description'], 'string', 'max' => 50],
             [['name'], 'unique'],
             [['pairedWith'], 'exist', 'skipOnError' => true, 'targetClass' => Characteristic::class,
                 'targetAttribute' => ['pairedWith' => 'id']],
@@ -51,6 +53,7 @@ class Characteristic extends ActiveRecord
         return [
             'id' => 'ID',
             'name' => 'Name',
+            'description' => 'Description',
             'pairedWith' => 'Paired With',
         ];
     }

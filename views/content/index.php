@@ -54,12 +54,20 @@ $this->title = $title;
                         },
                         'detail' => function ($model) {
                             return Yii::$app->controller->renderPartial('additionalContentDetails', [
+                                'id' => $model['id'],
                                 'description' => $model['description'],
                             ]);
                         },
                         'headerOptions' => ['class' => 'kartik-sheet-style ficha'],
                         'contentOptions'=>['class'=>'kartik-sheet-style ficha'],
                         'expandOneOnly' => true,
+                    ],
+                    [
+                        'attribute' => 'topic',
+                        'label' => 'Topic',
+                        'value' => function($model){
+                            return $model['topic'];
+                        }
                     ],
                     [
                         'attribute' => 'course.code',
@@ -102,7 +110,7 @@ $this->title = $title;
                             ]
                         ],
                         'value' => function($model){
-                            return $model['characteristic']['name'];
+                            return $model['characteristic']['description'];
                         }
                     ],
                     [

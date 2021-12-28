@@ -25,7 +25,6 @@ class ContentSearch extends Content
             'course.name',
             'creator.username',
             'characteristic.id',
-            'characteristic.name',
         ]);
     }
 
@@ -40,12 +39,13 @@ class ContentSearch extends Content
                     'url',
                     'description',
                     'type',
+                    'topic',
                     'createdBy',
                     'createdAt',
                     'course.code',
                     'course.name',
                     'creator.username',
-                    'characteristic.id'
+                    'characteristic.id',
                 ],
                 'safe'
             ],
@@ -78,13 +78,14 @@ class ContentSearch extends Content
                 'cont.description',
                 'cont.type',
                 'cont.createdBy',
-                'cont.createdAt'
+                'cont.createdAt',
+                'cont.topic'
             ])
             ->joinWith(['course cs' => function(ActiveQuery $q){
                 $q->select(['cs.id', 'cs.code', 'cs.name']);
             }], true, 'INNER JOIN')
             ->joinWith(['characteristic ch' => function(ActiveQuery  $q){
-                $q->select(['ch.id', 'ch.name']);
+                $q->select(['ch.id', 'ch.name', 'ch.description']);
             }], true, 'INNER JOIN')
             ->joinWith(['creator cr' => function(ActiveQuery $q){
                 $q->select(['cr.id', 'cr.username']);
@@ -110,6 +111,7 @@ class ContentSearch extends Content
             return $dataProvider;
         }
 
+        $query->andFilterWhere(['like', 'cont.topic', $this->getAttribute('cont.topic')]);
         $query->andFilterWhere(['like', 'cont.url', $this->url]);
         $query->andFilterWhere(['like', 'cs.code', $this->getAttribute('course.code')]);
         $query->andFilterWhere(['like', 'cs.name', $this->getAttribute('course.name')]);

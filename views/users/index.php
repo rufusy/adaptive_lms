@@ -95,6 +95,27 @@ $this->title = $title;
                         'hAlign' => 'center',
                     ]
                 ];
+
+                /**
+                 * Add students with an Excel file
+                 * Add tutors and admin with a form
+                 */
+                if($group === 'student'){
+                    $content = Html::button('<i class="fas fa-upload"></i>', [
+                        'title' => 'Upload users from an Excel file',
+                        'id' => 'excel-user-btn',
+                        'class' => 'btn btn-sm',
+                        'href' => Url::to(['/users/create-from-excel'])
+                    ]);
+                }else{
+                    $content = Html::button('<i class="fas fa-plus"></i> user', [
+                        'title' => 'Create new user',
+                        'id' => 'new-user-btn',
+                        'class' => 'btn btn-block btn-sm',
+                        'href' => Url::to(['/users/create']),
+                    ]);
+                }
+
                 try {
                     echo GridView::widget([
                         'id' => 'users-grid',
@@ -106,18 +127,7 @@ $this->title = $title;
                         'pjax' => true,
                         'toolbar' => [
                             [
-                                'content' => Html::button('<i class="fas fa-plus"></i> user', [
-                                        'title' => 'Create new user',
-                                        'id' => 'new-user-btn',
-                                        'class' => 'btn btn-block btn-sm',
-                                        'href' => Url::to(['/users/create']),
-                                    ]).'&nbsp;&nbsp;'.
-                                    Html::button('<i class="fas fa-upload"></i>', [
-                                        'title' => 'Upload users from an Excel file',
-                                        'id' => 'excel-user-btn',
-                                        'class' => 'btn btn-sm',
-                                        'href' => Url::to(['/users/create-from-excel'])
-                                    ]),
+                                'content' => $content,
                                 'options' => ['class' => 'btn-group mr-2']
                             ],
                             '{export}',

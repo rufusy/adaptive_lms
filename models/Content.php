@@ -12,9 +12,10 @@ use yii\db\Expression;
  * This is the model class for table "content".
  *
  * @property int $id
+ * @property string $topic
  * @property int $courseId
- * @property string $url
- * @property int|null $description
+ * @property string|null $url
+ * @property string|null $description
  * @property int|null $type
  * @property int|null $createdBy
  * @property int|null $updateBy
@@ -41,9 +42,9 @@ class Content extends ActiveRecord
     public function rules(): array
     {
         return [
-            [['courseId', 'url'], 'required'],
+            [['topic', 'courseId'], 'required'],
+            [['topic', 'url', 'description'], 'string'],
             [['courseId', 'type', 'createdBy', 'updateBy'], 'integer'],
-            [['url', 'description'], 'string'],
             [['createdAt', 'updatedAt'], 'safe'],
             [['courseId'], 'exist', 'skipOnError' => true, 'targetClass' => Course::class,
                 'targetAttribute' => ['courseId' => 'id']],
@@ -61,6 +62,7 @@ class Content extends ActiveRecord
     {
         return [
             'id' => 'ID',
+            'topic' => 'Topic',
             'courseId' => 'Course ID',
             'url' => 'Url',
             'description' => 'Description',

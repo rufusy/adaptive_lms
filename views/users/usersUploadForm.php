@@ -15,6 +15,7 @@ use yii\helpers\Url;
 <?php
 $form = ActiveForm::begin([
     'action' => Url::to(['/users/upload']),
+    'options' => ['enctype' => 'multipart/form-data']
 ]);
 ?>
 <div class="loader"></div>

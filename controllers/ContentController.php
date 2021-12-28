@@ -6,14 +6,18 @@ namespace app\controllers;
 
 use app\models\Characteristic;
 use app\models\Content;
+use app\models\ContentUpload;
 use app\models\Course;
 use app\models\search\ContentSearch;
 use Exception;
 use Yii;
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
+use yii\helpers\Json;
+use yii\helpers\Url;
 use yii\web\Response;
 use yii\web\ServerErrorHttpException;
+use yii\web\UploadedFile;
 
 class ContentController extends BaseController
 {
@@ -74,6 +78,7 @@ class ContentController extends BaseController
             return $this->render('createContent', [
                 'title'=> $this->createPageTitle('New content'),
                 'content' => new Content(),
+                'contentUpload' => new ContentUpload(),
                 'listOfCharacteristics' => $this->getCharacteristics(),
                 'listOfCourses' => $this->getCourses()
             ]);
@@ -98,12 +103,48 @@ class ContentController extends BaseController
             if(empty($id)){
                 throw new Exception('Content id must be provided.');
             }
+            // Get uploaded content files
+            $path = Yii::getAlias('@app') . '/uploads/content/' . $id . '/';
+            $initialPreview = [];
+            $initialPreviewConfig = [];
+            $docConfig = [];
+            $captionNames = '';
+            if(is_dir($path)){
+                $fileNames = array_diff(scandir($path), ['.', '..']);
+                if(!empty($fileNames)){
+                    foreach ($fileNames as $fileName){
+                        $initialPreview[] = $path . $fileName;
+                        $initialPreviewConfig[] = [
+                            'key' => $id,
+                            'caption' => $fileName,
+                            'type' => 'pdf',
+                            'extra' => ['name' => $fileName]
+                        ];
+                    }
+                    $captionNames = implode(', ', $fileNames);
+                }
+            }
+
+            $docConfig['initialPreview'] = $initialPreview;
+            $docConfig['initialPreviewConfig'] = $initialPreviewConfig;
+            $docConfig['initialCaption'] = $captionNames;
+            $docConfig['initialPreviewAsData'] = true;
+            $docConfig['overwriteInitial'] = false;
+            $docConfig['maxFilePreviewSize'] = 0;
+            $docConfig['showUpload'] = false;
+            $docConfig['browseClass'] = 'btn';
+            $docConfig['browseIcon'] = '<i class="fas fa-file"></i>';
+            $docConfig['browseLabel'] = 'Select new file(s)';
+            $docConfig['showCaption'] = false;
+            $docConfig['deleteUrl'] = 'delete-file';
 
             return $this->render('editContent', [
                 'title'=> $this->createPageTitle('Edit content'),
                 'content' => $this->getContent($id),
                 'listOfCharacteristics' => $this->getCharacteristics(),
-                'listOfCourses' => $this->getCourses()
+                'listOfCourses' => $this->getCourses(),
+                'contentUpload' => new ContentUpload(),
+                'docConfig' => $docConfig
             ]);
         }catch (Exception $ex){
             $message = $ex->getMessage();
@@ -121,9 +162,11 @@ class ContentController extends BaseController
     public function actionStore(): Response
     {
         $transaction = Yii::$app->db->beginTransaction();
+        $content = $this->storeUpdate(new Content(), Yii::$app->request->post());
         try{
-            $content = $this->storeUpdate(new Content(), Yii::$app->request->post());
-            if(!$content->save()){
+            if($content->save()){
+                $this->storeUpdateFiles($content);
+            }else{
                 throw new Exception('Failed to create content.');
             }
             $transaction->commit();
@@ -150,7 +193,9 @@ class ContentController extends BaseController
             $post = Yii::$app->request->post();
             $content = $this->getContent($post['Content']['id']);
             $content = $this->storeUpdate($content, $post);
-            if(!$content->save()){
+            if($content->save()){
+                $this->storeUpdateFiles($content);
+            }else{
                 throw new Exception('Failed to update content.');
             }
             $transaction->commit();
@@ -163,6 +208,61 @@ class ContentController extends BaseController
                 $message .= ' File: ' . $ex->getFile() . ' Line: ' . $ex->getLine();
             }
             return $this->asJson(['status' => 500, 'message' => $message]);
+        }
+    }
+
+    /**
+     * @param string $id
+     * @param string $name
+     * @return Response
+     * @throws ServerErrorHttpException
+     */
+    public function actionDownloadFile(string $id, string $name): Response
+    {
+        try{
+            if(empty($id) || empty($name)){
+                throw new Exception('Content id and file name must be provided.');
+            }
+
+            $file= Yii::getAlias('@app') . '/uploads/content/' . $id . '/' . $name;
+
+            if (file_exists($file)) {
+                header('Content-Type: application/pdf');
+                header("Content-Disposition: attachment; filename=\"$file\"");
+                readfile($file);
+            }
+
+            $this->setFlash('success', 'File download', 'File downloaded successfully');
+            return $this->redirect(Yii::$app->request->referrer ?: Yii::$app->homeUrl);
+        }catch (Exception $ex){
+            $message = $ex->getMessage();
+            if(YII_ENV_DEV){
+                $message .= ' File: ' . $ex->getFile() . ' Line: ' . $ex->getLine();
+            }
+            throw new ServerErrorHttpException($message, 500);
+        }
+    }
+
+    /**
+     * @return void
+     * @throws ServerErrorHttpException
+     */
+    public function actionDeleteFile()
+    {
+        try{
+            $post = Yii::$app->request->post();
+            $path = Yii::getAlias('@app') . '/uploads/content/' . $post['key'] . '/' . $post['name'];
+            $out=[];
+            if (!file_exists($path) || !@unlink($path)) {
+                $out= ['error'=>'The file does not exist or it was deleted previously! Refresh the Page to confirm!'];
+            }
+            echo Json::encode($out);
+        }catch (Exception $ex){
+            $message = $ex->getMessage();
+            if(YII_ENV_DEV){
+                $message .= ' File: ' . $ex->getFile() . ' Line: ' . $ex->getLine();
+            }
+            throw new ServerErrorHttpException($message, 500);
         }
     }
 
@@ -194,6 +294,20 @@ class ContentController extends BaseController
     }
 
     /**
+     * @param Content $content
+     * @return void
+     * @throws Exception
+     */
+    private function storeUpdateFiles(Content $content)
+    {
+        $contentUpload = new ContentUpload();
+        $contentUpload->contentFiles = UploadedFile::getInstances($contentUpload, 'contentFiles');
+        if (!$contentUpload->upload($content->getPrimaryKey(), true)) {
+            throw new Exception('Failed to upload content files.');
+        }
+    }
+
+    /**
      * Save or update content
      * @param Content $content
      * @param array $post
@@ -203,6 +317,7 @@ class ContentController extends BaseController
     {
         $content->url = $post['Content']['url'];
         $content->courseId = $post['Content']['courseId'];
+        $content->topic = $post['Content']['topic'];
         $content->type = $post['Content']['type'];
         $content->description = $post['description'];
         if(is_null($content->id)){
@@ -235,9 +350,10 @@ class ContentController extends BaseController
      */
     private function getCharacteristics(): array
     {
-        $characteristics = Characteristic::find()->select(['id','name'])->all();
+        $characteristics = Characteristic::find()->select(['id','name','description'])
+            ->where(['not', ['description' => null]])->all();
         return ArrayHelper::map($characteristics, 'id', function($characteristic){
-            return $characteristic->name;
+            return $characteristic->description;
         });
     }
 
