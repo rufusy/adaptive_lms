@@ -104,7 +104,7 @@ class ContentController extends BaseController
                 throw new Exception('Content id must be provided.');
             }
             // Get uploaded content files
-            $path = Yii::getAlias('@app') . '/uploads/content/' . $id . '/';
+            $path = Yii::getAlias('@webroot') . '/uploads/content/' . $id . '/';
             $initialPreview = [];
             $initialPreviewConfig = [];
             $docConfig = [];
@@ -137,6 +137,7 @@ class ContentController extends BaseController
             $docConfig['browseLabel'] = 'Select new file(s)';
             $docConfig['showCaption'] = false;
             $docConfig['deleteUrl'] = 'delete-file';
+            $docConfig['allowedFileExtensions'] = ['pdf'];
 
             return $this->render('editContent', [
                 'title'=> $this->createPageTitle('Edit content'),
@@ -214,26 +215,17 @@ class ContentController extends BaseController
     /**
      * @param string $id
      * @param string $name
-     * @return Response
+     * @return \yii\console\Response|Response
      * @throws ServerErrorHttpException
      */
-    public function actionDownloadFile(string $id, string $name): Response
+    public function actionDownloadFile(string $id, string $name)
     {
         try{
             if(empty($id) || empty($name)){
                 throw new Exception('Content id and file name must be provided.');
             }
-
-            $file= Yii::getAlias('@app') . '/uploads/content/' . $id . '/' . $name;
-
-            if (file_exists($file)) {
-                header('Content-Type: application/pdf');
-                header("Content-Disposition: attachment; filename=\"$file\"");
-                readfile($file);
-            }
-
-            $this->setFlash('success', 'File download', 'File downloaded successfully');
-            return $this->redirect(Yii::$app->request->referrer ?: Yii::$app->homeUrl);
+            $file = Yii::getAlias('@webroot') . '/uploads/content/' . $id . '/' . $name;
+            return Yii::$app->response->sendFile($file, $name, ['inline'=>true]);
         }catch (Exception $ex){
             $message = $ex->getMessage();
             if(YII_ENV_DEV){
@@ -251,7 +243,7 @@ class ContentController extends BaseController
     {
         try{
             $post = Yii::$app->request->post();
-            $path = Yii::getAlias('@app') . '/uploads/content/' . $post['key'] . '/' . $post['name'];
+            $path = Yii::getAlias('@webroot') . '/uploads/content/' . $post['key'] . '/' . $post['name'];
             $out=[];
             if (!file_exists($path) || !@unlink($path)) {
                 $out= ['error'=>'The file does not exist or it was deleted previously! Refresh the Page to confirm!'];

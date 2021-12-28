@@ -41,14 +41,14 @@ use yii\helpers\Url;
                 <div class="card-body">
                     <p class="lead">Click on a file to download</p>
                     <?php
-                        $path = Yii::getAlias('@app') . '/uploads/content/' . $id . '/';
+                        $path = Yii::getAlias('@webroot') . '/uploads/content/' . $id . '/';
                         if(is_dir($path)) {
                             $fileNames = array_diff(scandir($path), ['.', '..']);
                         }
                         if(!empty($fileNames)):
                             foreach ($fileNames as $fileName):
                     ?>
-                        <a href="<?= Url::to(['/content/download-file', 'id' => $id, 'name' => $fileName]);?>">
+                        <a href="<?= Url::to(['/content/download-file', 'id' => $id, 'name' => $fileName]);?>" target="_blank" >
                             <?= $fileName; ?>
                         </a>
                         <br>

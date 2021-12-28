@@ -22,7 +22,7 @@ class ContentUpload extends Model
     public function rules(): array
     {
         return [
-            [['contentFiles'], 'file', 'maxFiles' => 5, 'skipOnEmpty' => true],
+            [['contentFiles'], 'file', 'maxFiles' => 5, 'extensions' => 'pdf', 'skipOnEmpty' => true],
         ];
     }
 
@@ -45,7 +45,7 @@ class ContentUpload extends Model
     public function upload(int $contentId, bool $update = false): bool
     {
         if ($this->validate()) {
-            $path = Yii::getAlias('@app') . '/uploads/content/' . $contentId;
+            $path = Yii::getAlias('@webroot') . '/uploads/content/' . $contentId;
             FileHelper::createDirectory($path);
             foreach ($this->contentFiles as $file) {
                 $fileName = preg_replace('/\s/','_', $file->baseName) . '.' . $file->extension;
