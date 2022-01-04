@@ -8,7 +8,7 @@
  * @var string $description
  */
 
-use yii\helpers\Url;
+use yii\helpers\Html;
 ?>
 
 <!-- Main content -->
@@ -48,9 +48,8 @@ use yii\helpers\Url;
                         if(!empty($fileNames)):
                             foreach ($fileNames as $fileName):
                     ?>
-                        <a href="<?= Url::to(['/content/download-file', 'id' => $id, 'name' => $fileName]);?>" target="_blank" >
-                            <?= $fileName; ?>
-                        </a>
+                        <?= Html::a($fileName, ['/content/download-file', 'id' => $id, 'name' => $fileName],
+                                ['target'=>'_blank', 'data-pjax' => 0]) ?>
                         <br>
                     <?php
                             endforeach;

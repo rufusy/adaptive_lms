@@ -117,7 +117,6 @@ $this->title = $title;
                                        'browseClass' => 'btn',
                                        'browseIcon' => '<i class="fas fa-file"></i> ',
                                        'browseLabel' => 'Select file(s)',
-                                       'allowedFileExtensions' => ['pdf'],
                                    ]
                                ])
                                ->label('File(s)');

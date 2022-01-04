@@ -117,7 +117,7 @@ class ContentController extends BaseController
                         $initialPreviewConfig[] = [
                             'key' => $id,
                             'caption' => $fileName,
-                            'type' => 'pdf',
+                            'type' => $this->setPreviewType($fileName),
                             'extra' => ['name' => $fileName]
                         ];
                     }
@@ -137,7 +137,6 @@ class ContentController extends BaseController
             $docConfig['browseLabel'] = 'Select new file(s)';
             $docConfig['showCaption'] = false;
             $docConfig['deleteUrl'] = 'delete-file';
-            $docConfig['allowedFileExtensions'] = ['pdf'];
 
             return $this->render('editContent', [
                 'title'=> $this->createPageTitle('Edit content'),
@@ -213,19 +212,21 @@ class ContentController extends BaseController
     }
 
     /**
+     * Download content files
      * @param string $id
      * @param string $name
-     * @return \yii\console\Response|Response
+     * @return Response
      * @throws ServerErrorHttpException
+     * @see https://linuxhint.com/download_file_php/
      */
-    public function actionDownloadFile(string $id, string $name)
+    public function actionDownloadFile(string $id, string $name): Response
     {
         try{
             if(empty($id) || empty($name)){
                 throw new Exception('Content id and file name must be provided.');
             }
-            $file = Yii::getAlias('@webroot') . '/uploads/content/' . $id . '/' . $name;
-            return Yii::$app->response->sendFile($file, $name, ['inline'=>true]);
+            $filename = Yii::getAlias('@webroot') . '/uploads/content/' . $id . '/' . $name;
+            return Yii::$app->response->sendFile($filename, $name, ['inline' => true]);
         }catch (Exception $ex){
             $message = $ex->getMessage();
             if(YII_ENV_DEV){
@@ -358,5 +359,33 @@ class ContentController extends BaseController
         return ArrayHelper::map($courses, 'id', function($course){
             return $course->name . ' ('.  $course->code . ')';
         });
+    }
+
+    /**
+     * Set the file input preview type from a file extension
+     * @param string $fileName
+     * @return string preview type
+     */
+    private function setPreviewType(string $fileName): string
+    {
+        $filePreviewConfig = [
+            'text' => ['txt', 'csv'],
+            'pdf' => ['pdf'],
+            'image' => ['jpg', 'jpeg', 'png', 'svg'],
+            'html' => ['html', 'htm', 'css'],
+            'office' => ['doc', 'docx', 'odt', 'xls', 'xlsx', 'ppt', 'pptx', 'ods'],
+            'video' => ['mp4', 'mov', 'wmv', 'avi', 'mkv', 'mp3', 'wav', 'wma'],
+        ];
+        $extension = pathinfo($fileName)['extension'];
+        $previewType = 'other';
+        foreach ($filePreviewConfig as $key => $configExtensions){
+            foreach ($configExtensions as $configExtension){
+                if($extension === $configExtension){
+                    $previewType = $key;
+                    break 2;
+                }
+            }
+        }
+        return $previewType;
     }
 }

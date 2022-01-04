@@ -18,11 +18,24 @@ class ContentUpload extends Model
 
     /**
      * {@inheritdoc}
+     *
+     * Allow all file types
+     * Limit file size to 10Mb
+     * A maximum of 5 files at a time
      */
     public function rules(): array
     {
         return [
-            [['contentFiles'], 'file', 'maxFiles' => 5, 'extensions' => 'pdf', 'skipOnEmpty' => true],
+            [['contentFiles'], 'file', 'skipOnEmpty' => true, 'maxFiles' => 5, 'maxSize' => 10485760,
+                'mimeTypes' => [
+                    'image/*',
+                    'application/*',
+                    'text/*',
+                    'audio/*',
+                    'video/*',
+                    'multipart/*'
+                ],
+            ]
         ];
     }
 
