@@ -26,7 +26,7 @@ class Characteristic extends ActiveRecord
      */
     public static function tableName(): string
     {
-        return 'characteristics';
+        return 'characteristic';
     }
 
     /**
@@ -35,8 +35,8 @@ class Characteristic extends ActiveRecord
     public function rules(): array
     {
         return [
-            [['name'], 'required'],
-            [['pairedWith'], 'integer'],
+            [['name', 'level'], 'required'],
+            [['pairedWith', 'level'], 'integer'],
             [['name'], 'string', 'max' => 25],
             [['description'], 'string', 'max' => 50],
             [['name'], 'unique'],
@@ -55,6 +55,7 @@ class Characteristic extends ActiveRecord
             'name' => 'Name',
             'description' => 'Description',
             'pairedWith' => 'Paired With',
+            'level' => 'Level',
         ];
     }
 

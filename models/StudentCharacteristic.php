@@ -25,7 +25,7 @@ class StudentCharacteristic extends ActiveRecord
      */
     public static function tableName(): string
     {
-        return 'student_characteristics';
+        return 'student_characteristic';
     }
 
     /**

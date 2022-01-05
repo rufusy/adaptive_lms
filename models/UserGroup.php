@@ -22,7 +22,7 @@ class UserGroup extends ActiveRecord
      */
     public static function tableName(): string
     {
-        return 'user_groups';
+        return 'user_group';
     }
 
     /**

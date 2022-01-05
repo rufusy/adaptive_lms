@@ -85,7 +85,7 @@ class ContentSearch extends Content
                 $q->select(['cs.id', 'cs.code', 'cs.name']);
             }], true, 'INNER JOIN')
             ->joinWith(['characteristic ch' => function(ActiveQuery  $q){
-                $q->select(['ch.id', 'ch.name', 'ch.description']);
+                $q->select(['ch.id', 'ch.name', 'ch.description', 'ch.level']);
             }], true, 'INNER JOIN')
             ->joinWith(['creator cr' => function(ActiveQuery $q){
                 $q->select(['cr.id', 'cr.username']);
@@ -95,7 +95,7 @@ class ContentSearch extends Content
                 $query->where(['cr.id' => $additionalParams['id']]);
             }
 
-            $query->orderBy(['cont.id' => SORT_DESC])->asArray();
+            $query->orderBy(['ch.level' => SORT_ASC, 'cont.id' => SORT_DESC])->asArray();
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,

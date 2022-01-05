@@ -82,8 +82,11 @@ class ReadingMaterialSearch extends Content
             ->joinWith(['creator cr' => function(ActiveQuery $q){
                 $q->select(['cr.id', 'cr.username']);
             }], true, 'INNER JOIN')
+            ->joinWith(['characteristic ch' => function(ActiveQuery  $q){
+                $q->select(['ch.id', 'ch.name', 'ch.description', 'ch.level']);
+            }], true, 'INNER JOIN')
             ->where(['in' , 'cont.type', $additionalParams['types']])
-            ->orderBy(['cont.id' => SORT_DESC])->asArray();
+            ->orderBy(['ch.level' => SORT_ASC, 'cont.id' => SORT_DESC])->asArray();
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
