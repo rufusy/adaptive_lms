@@ -129,4 +129,14 @@ class SiteController extends BaseController
         Yii::$app->user->logout();
         return $this->goHome();
     }
+
+    /**
+     * Download user manual
+     * @return \yii\console\Response|Response
+     */
+    public function actionDownloadManual()
+    {
+        $filename = Yii::getAlias('@webroot') . '/uploads/manual/user_manual.pdf' ;
+        return Yii::$app->response->sendFile($filename, 'user_manual', ['inline' => true]);
+    }
 }

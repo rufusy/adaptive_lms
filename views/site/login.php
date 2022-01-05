@@ -6,6 +6,7 @@
 /* @var $this yii\web\View */
 /* @var app\models\LoginForm $loginForm */
 
+use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\ActiveForm;
 ?>
@@ -31,7 +32,9 @@ use yii\widgets\ActiveForm;
                 ->hint('Type the word password');
             ?>
             <div class="row">
-                <div class="col-8"></div>
+                <div class="col-8">
+                    <?= Html::a('Download user manual', ['/site/download-manual'], ['target'=>'_blank']) ?>
+                </div>
                 <div class="col-4">
                     <button type="submit" class="btn btn-primary btn-block">Sign In</button>
                 </div>
