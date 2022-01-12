@@ -104,4 +104,46 @@ class ReadingController extends BaseController
             throw new ServerErrorHttpException($message, 500);
         }
     }
+
+    /**
+     * @return string page to display learner's behaviours
+     * @throws ServerErrorHttpException
+     */
+    public function actionMyBehaviour(): string
+    {
+        try{
+            $characteristics = StudentCharacteristic::find()->alias('sc')
+                ->select(['sc.value', 'sc.characteristicId'])
+                ->joinWith(['characteristic ch'])
+                ->where(['sc.studentId' => Yii::$app->user->identity->id])
+                ->orderBy(['ch.id' => SORT_ASC])
+                ->asArray()->all();
+
+            $namesToRemove = [
+                'IRA_Low',
+                'IPS_Low',
+                'ALA_repeat',
+                'WMC_nonlinear'
+            ];
+
+            $characteristicsToKeep = [];
+            foreach ($characteristics as $key => $characteristic){
+                $name = $characteristic['characteristic']['name'];
+                if(!in_array($name, $namesToRemove)){
+                    $characteristicsToKeep[] = $characteristic;
+                }
+            }
+
+            return $this->render('myBehaviours', [
+                'title' => $this->createPageTitle('my learning behaviour'),
+                'characteristics' => $characteristicsToKeep,
+            ]);
+        }catch(Exception $ex){
+            $message = $ex->getMessage();
+            if(YII_ENV_DEV){
+                $message .= ' File: ' . $ex->getFile() . ' Line: ' . $ex->getLine();
+            }
+            throw new ServerErrorHttpException($message, 500);
+        }
+    }
 }
