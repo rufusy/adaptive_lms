@@ -122,7 +122,7 @@ class ReadingController extends BaseController
             $namesToRemove = [
                 'IRA_Low',
                 'IPS_Low',
-                'ALA_repeat',
+                'ALA_single',
                 'WMC_nonlinear'
             ];
 

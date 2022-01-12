@@ -61,7 +61,7 @@ $this->title = $title;
                                         $name = $characteristic['characteristic']['name'];
                                         $name = str_replace('_High', '', $name);
                                         $name = str_replace('_H', '', $name);
-                                        $name = str_replace('_single', '', $name);
+                                        $name = str_replace('_repeat', '', $name);
                                         $name = str_replace('_linear', '', $name);
                                         echo $name;
                                         ?>
