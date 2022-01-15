@@ -75,15 +75,15 @@ use yii\helpers\Url;
                     </li>
                 <?php else:?>
                     <li class="nav-item">
-                        <a href="<?= Url::to(['/reading']);?>" class="nav-link">
-                            <i class="nav-icon fas fa-book-open"></i>
-                            <p>My reading material</p>
-                        </a>
-                    </li>
-                    <li class="nav-item">
                         <a href="<?= Url::to(['/reading/my-behaviour']);?>" class="nav-link">
                             <i class="nav-icon fas fa-book-open"></i>
                             <p>My learning behaviour</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="<?= Url::to(['/reading']);?>" class="nav-link">
+                            <i class="nav-icon fas fa-book-open"></i>
+                            <p>My reading material</p>
                         </a>
                     </li>
                 <?php endif;?>

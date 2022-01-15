@@ -19,8 +19,8 @@ AppAsset::register($this);
 <head>
     <meta charset="<?= Yii::$app->charset ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link rel="shortcut icon" href="<?=Yii::getAlias('@web');?>/img/logo.png" type="image/x-icon">
-    <link rel="icon" href="<?=Yii::getAlias('@web');?>/img/logo.png" type="image/x-icon">
+    <link rel="shortcut icon" href="<?=Yii::getAlias('@web');?>/img/logo.jpg" type="image/x-icon">
+    <link rel="icon" href="<?=Yii::getAlias('@web');?>/img/logo.jpg" type="image/x-icon">
     <?php $this->registerCsrfMetaTags() ?>
     <title><?= Html::encode($this->title) ?></title>
     <?php $this->head() ?>
@@ -53,7 +53,7 @@ AppAsset::register($this);
 
     <!-- /.content-wrapper -->
     <footer class="main-footer">
-        <strong>Copyright &copy; 2021-<?= date('Y') ?> <a href="#">Adaptive LMS</a></strong>
+        <strong>Copyright &copy; 2021-<?= date('Y') ?> <a href="#"><?= Yii::$app->params['sitename']; ?></a></strong>
         All rights reserved.
     </footer>
 

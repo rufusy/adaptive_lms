@@ -11,6 +11,9 @@ use yii\helpers\Url;
 use yii\widgets\ActiveForm;
 ?>
 <div class="login-box">
+    <div class="login-logo">
+        <a href="#"><b>Cogni</b>Learn</a>
+    </div>
     <div class="card">
         <div class="card-body login-card-body">
             <?php
