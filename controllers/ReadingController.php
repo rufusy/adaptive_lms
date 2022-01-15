@@ -120,10 +120,10 @@ class ReadingController extends BaseController
                 ->asArray()->all();
 
             $namesToRemove = [
-                'IRA_Low',
-                'IPS_Low',
-                'ALA_single',
-                'WMC_nonlinear'
+                'Inductive Reasoning Ability_Low',
+                'Information Processing Speed_Low',
+                'Associative Learning Ability_single',
+                'Working Memory Capacity_nonlinear'
             ];
 
             $characteristicsToKeep = [];
