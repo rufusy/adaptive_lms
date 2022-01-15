@@ -12,6 +12,9 @@ use yii\widgets\ActiveForm;
 ?>
 <div class="login-box">
     <div class="login-logo">
+        <div class="text-center">
+            <img src="<?=Yii::getAlias('@web');?>/img/brain.jpg" class="brand-image img-fluid img-thumbnail ">
+        </div>
         <a href="#"><b>Cogni</b>Learn</a>
     </div>
     <div class="card">
