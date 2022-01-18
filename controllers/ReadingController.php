@@ -38,15 +38,27 @@ class ReadingController extends BaseController
 
     /**
      * Display page with materials to read
+     *
+     * Learning materials are displayed to each student, according to their learning behaviors. These behaviors are
+     * paired and have values between 0 and 1. For non-zero value behaviors, the behavior with the larger value is
+     * selected in each pair. We then find content that match these behaviors.
+     * Some students have no behaviors defined in the system. For these students, we find their content according to the
+     * cluster in which they belong. To do this, we find other students in the same cluster and who have their behaviors
+     * in the system. We use these behaviors as discussed above to find matching content.
      * @return Response|string
      * @throws ServerErrorHttpException
      */
     public function actionIndex()
     {
         try{
+            /**
+             * Find the learning characteristics of the logged-in user.
+             * If characteristics are not defined, we use those for cluster mates.
+             */
             $studentCharacteristics = $this->getStudentCharacteristics(Yii::$app->user->identity->id);
 
             if(empty($studentCharacteristics)){
+                // If a student has no characteristic and doesn't belong in any cluster, we redirect to an alert page
                 if(is_null(Yii::$app->user->identity->cluster)){
                     return $this->redirect(['/reading/alert',
                         'message' => 'We are unable to find your learning materials because you do not belong in any cluster.']);
@@ -55,9 +67,6 @@ class ReadingController extends BaseController
                 /**
                  * Since we can't have all similar characteristics for all members in a cluster,
                  * we find the characteristics of all cluster members, combine them and remove duplicates.
-                 * At the moment we have 16 characteristics in the system.
-                 * Best case we get 16 total characteristics.
-                 * Worst case we get 16 * no. of cluster members total characteristics.
                  */
                 $users = User::find()->select(['id'])->where(['cluster' => Yii::$app->user->identity->cluster])
                     ->andWhere(['not', ['id' => Yii::$app->user->identity->id]])
@@ -77,6 +86,10 @@ class ReadingController extends BaseController
                 $studentCharacteristics = array_unique($clusterMatesCharacteristics, SORT_REGULAR);
             }
 
+            /**
+             * After we find all the characteristics of a student, or those of their cluster mates,
+             * we want to group them in their pairs.
+             */
             $morphedCharacteristics = [];
             foreach ($studentCharacteristics as $studentCharacteristic){
                 $characteristicId = $studentCharacteristic['characteristicId'];
@@ -96,7 +109,12 @@ class ReadingController extends BaseController
                 ];
             }
 
-            $preferredCharacteristics = [];
+            /**
+             * In each pair, we want to select a behavior with the largest value
+             * We disregard behaviors with zero values
+             */
+            $preferredCharacteristics = []; // We will match content according to these behaviors.
+
             $pairs = array_unique($pairsWithDuplicates, SORT_REGULAR);
             foreach ($pairs as $pair){
                 $keys = [];
@@ -117,6 +135,7 @@ class ReadingController extends BaseController
                 }
             }
 
+            // Read content matching the student's behaviors
             $materialSearchModel = new ReadingMaterialSearch();
             $materialDataProvider = $materialSearchModel->search(Yii::$app->request->queryParams, [
                 'id' => Yii::$app->user->identity->id,
@@ -240,10 +259,10 @@ class ReadingController extends BaseController
 
     /**
      * Get learning behaviours
-     * @param mixed $studentId
-     * @return array
+     * @param int $studentId
+     * @return array learner's behaviors
      */
-    private function getStudentCharacteristics($studentId): array
+    private function getStudentCharacteristics(int $studentId): array
     {
         return StudentCharacteristic::find()->select(['characteristicId', 'value'])
             ->where(['studentId' => $studentId])
