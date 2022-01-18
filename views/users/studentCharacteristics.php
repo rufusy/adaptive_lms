@@ -46,7 +46,15 @@ $characteristics = StudentCharacteristic::find()->alias('sc')
                         <tr>
                             <td><?= $count; ?></td>
                             <td><?= $characteristic['characteristic']['name'];?></td>
-                            <td><?= $characteristic['value'];?></td>
+                            <td>
+                                <?php
+                                $value = $characteristic['value'];
+                                if(strlen($value) == 1){
+                                    $value = $value . '.00';
+                                }
+                                echo $value;
+                                ?>
+                            </td>
                         </tr>
                         <?php $count++; endforeach;?>
                         </tbody>

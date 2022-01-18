@@ -68,6 +68,16 @@ $this->title = $title;
                         'label' => 'Username',
                     ],
                     [
+                        'attribute' => 'cluster',
+                        'label' => 'Cluster',
+                        'value' => function($model){
+                            if(is_null($model['cluster'])){
+                                return '';
+                            }
+                            return $model['cluster'];
+                        }
+                    ],
+                    [
                         'class' => 'kartik\grid\ActionColumn',
                         'template' => '{update} {delete}',
                         'contentOptions' => [
@@ -101,12 +111,18 @@ $this->title = $title;
                  * Add tutors and admin with a form
                  */
                 if($group === 'student'){
-                    $content = Html::button('<i class="fas fa-upload"></i>', [
-                        'title' => 'Upload users from an Excel file',
+                    $content = Html::button('<i class="fas fa-upload"></i> Students', [
+                        'title' => 'Upload students',
                         'id' => 'excel-user-btn',
                         'class' => 'btn btn-sm',
-                        'href' => Url::to(['/users/create-from-excel'])
-                    ]);
+                        'href' => Url::to(['/users/create-from-excel', 'type' => 'students'])
+                    ]).'&nbsp'.
+                       Html::button('<i class="fas fa-upload"></i> Clusters', [
+                            'title' => 'Upload students clusters',
+                            'id' => 'excel-clusters-btn',
+                            'class' => 'btn btn-sm',
+                            'href' => Url::to(['/users/create-from-excel', 'type' => 'clusters'])
+                        ]);
                 }else{
                     $content = Html::button('<i class="fas fa-plus"></i> user', [
                         'title' => 'Create new user',
@@ -172,7 +188,11 @@ $('#users-grid-pjax').on('click', '#new-user-btn', function(e){
 });
       
 $('#users-grid-pjax').on('click', '#excel-user-btn', function (e){
-    createOrUpdateModal.call(this, e, 'Upload users');
+    createOrUpdateModal.call(this, e, 'Upload students');
+});
+
+$('#users-grid-pjax').on('click', '#excel-clusters-btn', function (e){
+    createOrUpdateModal.call(this, e, 'Upload students clusters');
 });
 
 $('#users-grid-pjax').on('click', '.update-user-btn', function(e){

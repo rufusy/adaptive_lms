@@ -17,6 +17,7 @@ use yii\web\IdentityInterface;
  * @property string $username
  * @property string $password
  * @property int|null $userGroupId
+ * @property int|null $cluster
  *
  * @property Content[] $content
  * @property Characteristic[] $Characteristics
@@ -39,7 +40,7 @@ class User extends ActiveRecord implements IdentityInterface
     {
         return [
             [['username', 'password'], 'required'],
-            [['userGroupId'], 'integer'],
+            [['userGroupId', 'cluster'], 'integer'],
             [['username'], 'string', 'max' => 50],
             [['password'], 'string', 'max' => 256],
             [['username'], 'unique'],
@@ -58,6 +59,7 @@ class User extends ActiveRecord implements IdentityInterface
             'username' => 'Username',
             'password' => 'Password',
             'userGroupId' => 'User Group ID',
+            'cluster' => 'Cluster'
         ];
     }
 

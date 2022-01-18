@@ -5,28 +5,19 @@
 namespace app\models\search;
 
 use app\models\User;
+use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use yii\db\ActiveQuery;
 
-class UsersSearch extends User
+class ClusterMatesSearch extends User
 {
     /**
      * {@inheritdoc}
      */
     public function rules(): array
     {
-        return [
-            [
-                [
-                    'id',
-                    'username',
-                    'cluster',
-                    'userGroup.id'
-                ],
-                'safe'
-            ],
-        ];
+        return [];
     }
 
     /**
@@ -41,11 +32,9 @@ class UsersSearch extends User
     /**
      * Creates data provider instance with search query applied
      *
-     * @param array $params
-     * @param array $additionalParams
      * @return ActiveDataProvider
      */
-    public function search(array $params, array $additionalParams): ActiveDataProvider
+    public function search(): ActiveDataProvider
     {
         $query = User::find()->alias('u')->select([
                 'u.id',
@@ -56,7 +45,8 @@ class UsersSearch extends User
             ->joinWith(['userGroup ug' => function(ActiveQuery $q){
                 $q->select(['ug.id']);
             }], true, 'INNER JOIN')
-            ->where(['ug.name' => $additionalParams['group']])
+            ->where(['ug.name' => 'student', 'u.cluster' => Yii::$app->user->identity->cluster])
+            ->andWhere(['not', ['u.username' => Yii::$app->user->identity->username]])
             ->asArray();
 
         $dataProvider = new ActiveDataProvider([
@@ -67,14 +57,10 @@ class UsersSearch extends User
             ],
         ]);
 
-        $this->load($params);
-
         if(!$this->validate()) {
             return $dataProvider;
         }
 
-        $query->andFilterWhere(['like', 'u.username', $this->username]);
-        $query->andFilterWhere(['u.cluster' => $this->cluster]);
         $query->orderBy(['u.id' => SORT_ASC]);
 
         return $dataProvider;

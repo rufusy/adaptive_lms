@@ -5,6 +5,7 @@
 namespace app\controllers;
 
 use app\models\Characteristic;
+use app\models\ClusterUpload;
 use app\models\search\UsersSearch;
 use app\models\StudentCharacteristic;
 use app\models\User;
@@ -163,15 +164,25 @@ class UsersController extends BaseController
     }
 
     /**
+     * Displays forms to upload students and clusters
      * @throws ServerErrorHttpException
      */
-    public function actionCreateFromExcel(): string
+    public function actionCreateFromExcel(string $type): string
     {
         try{
-            return $this->renderAjax('usersUploadForm', [
-                'title' => $this->createPageTitle('Upload users'),
-                'user' => new UsersUpload(),
-                'listOfRoles' => $this->getRoles()
+            if($type !== 'clusters' && $type !== 'students'){
+                throw new Exception('The correct type must be specified.');
+            }
+            if($type === 'students'){
+                return $this->renderAjax('usersUploadForm', [
+                    'title' => $this->createPageTitle('Upload users'),
+                    'user' => new UsersUpload(),
+                    'listOfRoles' => $this->getRoles()
+                ]);
+            }
+            return $this->renderAjax('clustersUploadForm', [
+                'title' => $this->createPageTitle('Upload students clusters'),
+                'cluster' => new ClusterUpload(),
             ]);
         }catch(Exception $ex){
             $message = $ex->getMessage();
@@ -288,6 +299,77 @@ class UsersController extends BaseController
             }
             $transaction->commit();
             $this->setFlash('success', 'Create users', 'Users uploaded successfully.');
+            return $this->redirect(Yii::$app->request->referrer ?: Yii::$app->homeUrl);
+        }catch (Exception $ex){
+            $transaction->rollBack();
+            $message = $ex->getMessage();
+            if(YII_ENV_DEV){
+                $message .= ' File: ' . $ex->getFile() . ' Line: ' . $ex->getLine();
+            }
+            throw new ServerErrorHttpException($message, 500);
+        }
+    }
+
+    /**
+     * Upload students clusters data
+     * @return Response
+     * @throws ServerErrorHttpException
+     */
+    public function actionUploadClusters(): Response
+    {
+        $transaction = Yii::$app->db->beginTransaction();
+        try{
+            $post = Yii::$app->request->post();
+            $clusterUpload = new ClusterUpload();
+            $file = UploadedFile::getInstance($clusterUpload, 'clusterFile');
+            $clusterUpload->clusterFile = $file;
+            if($clusterUpload->validate()){
+                // upload the file on server
+                $path = Yii::getAlias('@app') . '/uploads';
+                FileHelper::createDirectory($path);
+                $fileName = preg_replace('/\s/','_', $file->baseName) . '.' . $file->extension;
+                $file->saveAs($path . '/' . $fileName, true);
+
+                // read the uploaded file and create/update students clusters
+                $inputFileName = $path . '/' . $fileName;
+                $inputFileType = IOFactory::identify($inputFileName);
+                $reader = IOFactory::createReader($inputFileType);
+                $reader->setReadDataOnly(true);
+                $spreadsheet = $reader->load($inputFileName);
+                $sheetData = $spreadsheet->getActiveSheet()->toArray(null, true, true,
+                    true);
+
+                // remove column names
+                array_shift($sheetData);
+                foreach ($sheetData as $sheetDatum){
+                    $user = User::find()->where(['username' => $sheetDatum['A']])->one();
+                    if(is_null($user)){
+                        $user = new user();
+                        $user->username = $sheetDatum['A'];
+
+                        $group = UserGroup::find()->where(['name' => 'student'])->one();
+                        $user->userGroupId = $group->id;
+                        $password = 'password';
+                        try{
+                            $user->password = Yii::$app->getSecurity()->generatePasswordHash($password);
+                        }catch(Exception $ex){
+                            $message = 'Bad password';
+                            if(YII_ENV_DEV){
+                                $message .= ' File: ' . $ex->getFile() . ' Line: ' . $ex->getLine();
+                            }
+                            throw new Exception($message);
+                        }
+                    }
+                    $user->cluster = $sheetDatum['B'];
+                    if(!$user->save()){
+                        dd($user->getErrors());
+                        throw new Exception('Failed to save students');
+                    }
+                }
+            }
+
+            $transaction->commit();
+            $this->setFlash('success', 'Upload students clusters', 'Clusters uploaded successfully.');
             return $this->redirect(Yii::$app->request->referrer ?: Yii::$app->homeUrl);
         }catch (Exception $ex){
             $transaction->rollBack();

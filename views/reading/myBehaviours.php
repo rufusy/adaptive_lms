@@ -41,7 +41,7 @@ $this->title = $title;
                     </div>
                     <!-- /.card-header -->
                     <div class="card-body p-0">
-                        <table class="table table-sm">
+                        <table class="table table-bordered table-hover table-sm">
                             <thead>
                             <tr>
                                 <th style="width: 10px">#</th>
@@ -65,7 +65,15 @@ $this->title = $title;
                                         echo $name;
                                         ?>
                                     </td>
-                                    <td><?= $characteristic['value'];?></td>
+                                    <td>
+                                        <?php
+                                        $value = $characteristic['value'];
+                                        if(strlen($value) == 1){
+                                            $value = $value . '.00';
+                                        }
+                                        echo $value;
+                                        ?>
+                                    </td>
                                 </tr>
                                 <?php $count++; endforeach;?>
                             </tbody>
