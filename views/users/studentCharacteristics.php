@@ -34,8 +34,8 @@ $characteristics = StudentCharacteristic::find()->alias('sc')
                         <thead>
                         <tr>
                             <th style="width: 10px">#</th>
-                            <th>Name</th>
-                            <th>Value</th>
+                            <th>Behavior</th>
+                            <th>Preference</th>
                         </tr>
                         </thead>
                         <tbody>

@@ -37,7 +37,7 @@ class Characteristic extends ActiveRecord
         return [
             [['name', 'level'], 'required'],
             [['pairedWith', 'level'], 'integer'],
-            [['name', 'description'], 'string', 'max' => 255],
+            [['name', 'description'], 'string', 'max' => 50],
             [['name'], 'unique'],
             [['pairedWith'], 'exist', 'skipOnError' => true, 'targetClass' => Characteristic::class,
                 'targetAttribute' => ['pairedWith' => 'id']],

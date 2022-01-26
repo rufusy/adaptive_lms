@@ -94,7 +94,7 @@ $this->title = $title;
                     ],
                     [
                         'attribute' => 'characteristic.id',
-                        'label' => 'Type',
+                        'label' => 'Behavior',
                         'filterType' => GridView::FILTER_SELECT2,
                         'filter' => $listOfCharacteristics,
                         'vAlign' => 'middle',
